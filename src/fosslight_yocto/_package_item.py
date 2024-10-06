@@ -5,6 +5,7 @@
 import re
 from fosslight_util.oss_item import OssItem
 from ._write_result_file import SHEET_NAME_SRC, SHEET_NAME_BIN, SHEET_NAME_BIN_YOCTO
+from typing import List, Dict, Any
 
 const_other_proprietary_license = 'other proprietary license'
 EXCLUDE_TRUE_VALUE = "Exclude"
@@ -21,30 +22,30 @@ class FileItem():
 
 class PackageItem(OssItem):
     def __init__(self):
-        self.oss_name = ""  # Default Value : Recipe Name
-        self._name = ""  # oss name to print
-        self._version = ""  # Default Value : PV
-        self.license = []  # Default value : license, it will be overwritten with a pkg_license.
-        self._declared_licenses = []  # Declared License in case of multi or dual licenses
-        self._source_name_or_path = []  # Files in installed package - Value of "Binary Name"
-        self.download_location = ""  # SRC_URI
-        self.copyright = ""
-        self._comment = ""
-        self.exclude = False
-        self.homepage = ""
-        self.parent_package_name = ""  # Packages created at build time have different installed and parent package names.
-        self._package_name = ""  # Installed Package name
-        self.src_path = ""
-        self.file_path = ""
-        self.spdx_id = ""
-        self._yocto_recipe = []
-        self._yocto_package = []
-        self.relative_path = ""
-        self.additional_data = {}
-        self.pv = ""
-        self.pr = ""
+        self.oss_name: str = ""  # Default Value : Recipe Name
+        self._name: str = ""  # oss name to print
+        self._version: str = ""  # Default Value : PV
+        self.license: List[str] = []  # Default value : license, it will be overwritten with a pkg_license.
+        self._declared_licenses: List[str] = []  # Declared License in case of multi or dual licenses
+        self._source_name_or_path: List[str] = []  # Files in installed package - Value of "Binary Name"
+        self.download_location: str = ""  # SRC_URI
+        self.copyright: str = ""
+        self._comment: str = ""
+        self.exclude: bool = False
+        self.homepage: str = ""
+        self.parent_package_name: str = ""  # Packages created at build time have different installed and parent package names.
+        self._package_name: str = ""  # Installed Package name
+        self.src_path: str = ""
+        self.file_path: str = ""
+        self.spdx_id: str = ""
+        self.yocto_recipe: List[str] = []
+        self.yocto_package: List[str] = []
+        self.relative_path: str = ""
+        self.additional_data: Dict[str] = {}
+        self.pv: str = ""
+        self.pr: str = ""
 
-    def __eq__(self, value):
+    def __eq__(self, value: Any) -> bool:
         return self.spdx_id == value
 
     def __del__(self):
@@ -59,11 +60,11 @@ class PackageItem(OssItem):
         self._package_name = value
 
     @property
-    def comment(self):
+    def comment(self) -> str:
         return self._comment
 
     @comment.setter
-    def comment(self, value):
+    def comment(self, value: Any) -> None:
         prefix = False
         comment_value = value
         if type(value) is tuple:
@@ -79,11 +80,11 @@ class PackageItem(OssItem):
         self._comment = self._comment.replace("//", "/")
 
     @property
-    def copyright(self):
+    def copyright(self) -> str:
         return self._copyright
 
     @copyright.setter
-    def copyright(self, value):
+    def copyright(self, value: str) -> None:
         if value:
             value = value.strip()
             if value == IGNORE_COPYRIGHT:
@@ -91,25 +92,25 @@ class PackageItem(OssItem):
         self._copyright = value
 
     @property
-    def oss_name(self):
+    def oss_name(self) -> str:
         return self._oss_name
 
     @oss_name.setter
-    def oss_name(self, value):
+    def oss_name(self, value: str) -> None:
         if value != "":
             self._name = value.replace("lib32-", "", 1)
         self._oss_name = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def version(self):
+    def version(self) -> str:
         return self._version
 
     @version.setter
@@ -135,16 +136,16 @@ class PackageItem(OssItem):
             for word in _TRUNCATE_WORD:
                 self._version = str_value.split(sep=word, maxsplit=1)[0]
 
-    def set_license_flags(self, value):
+    def set_license_flags(self, value: str) -> None:
         if value:
             self.comment = f"[NEED CHECK]LICENSE_FLAGS = {value}"
 
     @property
-    def license(self):
+    def license(self) -> List[str]:
         return self._license
 
     @license.setter
-    def license(self, value, append_mode=False):
+    def license(self, value: Any, append_mode: bool = False) -> None:
 
         if not append_mode:
             self._license = []
@@ -181,17 +182,21 @@ class PackageItem(OssItem):
             self._license.remove(const_other_proprietary_license)
 
     @property
-    def declared_licenses(self):
+    def declared_licenses(self) -> List[str]:
         return self._declared_licenses
 
     @declared_licenses.setter
-    def declared_licenses(self, value):
+    def declared_licenses(self, value: List[str]) -> None:
         if value != "" and isinstance(value, list):
             if len(value) > 0:
                 self.comment = "License changed to the license registered in OSC System DB."
                 self._declared_licenses = value
 
-    def get_print_item(self, sheet_name=SHEET_NAME_SRC, additional_column=[], binary_list=[]):
+    def get_print_item(
+            self, sheet_name: str = SHEET_NAME_SRC,
+            additional_column: List[str] = [],
+            binary_list: List[FileItem] = []
+    ) -> List[List[Any]]:
         print_items = []
         license_to_print = self.license
         exclude = EXCLUDE_TRUE_VALUE if self.exclude else ""
@@ -224,7 +229,7 @@ class PackageItem(OssItem):
         return print_items
 
 
-def update_license(license_name):
+def update_license(license_name: str) -> str:
     license_map_list = {"bsd": "bsd-3-clause", "closed": const_other_proprietary_license, "mit-style": "mit-like license",
                         "bsd-style": "bsd-like license"}
 
@@ -237,7 +242,12 @@ def update_license(license_name):
         return license_name_ignore_case
 
 
-def set_value_switch(oss, key, value, nested_pkg_name):
+def set_value_switch(
+        oss: PackageItem,
+        key: str,
+        value: Any,
+        nested_pkg_name: Dict[str, str]
+) -> None:
     if key == 'name' or key == 'oss_name':
         oss.oss_name = value
     elif key == 'version':
@@ -274,7 +284,7 @@ def set_value_switch(oss, key, value, nested_pkg_name):
         oss.additional_data = value
 
 
-def update_package_name(oss, value, nested_pkg_name):
+def update_package_name(oss: PackageItem, value: str, nested_pkg_name: Dict[str, str]) -> PackageItem:
     if oss.package_name != value:
         if value in nested_pkg_name:
             oss.parent_package_name = nested_pkg_name[value]

@@ -7,7 +7,9 @@ import fosslight_util.constant as constant
 import codecs
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
+from ruamel.yaml.nodes import MappingNode
 import os
+from typing import Generator, List, Tuple
 from ._package_item import PackageItem, set_value_switch, update_package_name
 from fosslight_util.parsing_yaml import parsing_yml
 from copy import deepcopy
@@ -19,7 +21,7 @@ MSG_TO_EXCLUDE = "Excluded by oss-pkg-info.yaml"
 MSG_FROM_YAML_ROW = "Info loaded from oss-pkg-info.yaml"
 
 
-def construct_yaml_map(self, node):
+def construct_yaml_map(self: SafeConstructor, node: MappingNode) -> Generator[dict, None, None]:
     # test if there are duplicate node keys
     keys = set()
     for key_node, value_node in node.value:
@@ -41,7 +43,7 @@ def construct_yaml_map(self, node):
         data.append({key: val})
 
 
-def set_list_by_value(value):
+def set_list_by_value(value: object):
     items = []
     if value:
         if isinstance(value, list):
@@ -51,7 +53,13 @@ def set_list_by_value(value):
     return items
 
 
-def load_oss_pkg_info_yaml(oss_pkg_files, print_bin_android_mode, installed_packages_src, installed_packages_bin, nested_pkg_name):
+def load_oss_pkg_info_yaml(
+        oss_pkg_files: str,
+        print_bin_android_mode: bool,
+        installed_packages_src: List[PackageItem],
+        installed_packages_bin: List[PackageItem],
+        nested_pkg_name: bool
+) -> Tuple[List[PackageItem], List[PackageItem]]:
     all_pkgs_to_exclude = []
     oss_items_to_append = []
     for oss_pkg_info_yaml_file in oss_pkg_files.split(','):
@@ -104,7 +112,7 @@ def load_oss_pkg_info_yaml(oss_pkg_files, print_bin_android_mode, installed_pack
                            or x.parent_package_name in pkg_names_to_search or x.package_name in pkg_names_to_search]
 
         if len(pkgs_to_exclude) > 0:
-            search_list = recipe_names_to_search + pkg_names_to_search
+            search_list = [recipe_names_to_search] + [pkg_names_to_search]
             len_search = len(search_list)
             if len_search > 0:
                 update_package_name(oss, search_list[0], nested_pkg_name)

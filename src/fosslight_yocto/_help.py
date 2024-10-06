@@ -44,15 +44,15 @@ _HELP_MESSAGE_META_DOUBLE = """
             -o <file_name>\t\t   Output file name"""
 
 
-def print_help_msg_bom():
+def print_help_msg_bom() -> None:
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_BOM)
     helpMsg.print_help_msg(True)
 
 
-def print_help_msg_doubleopen():
+def print_help_msg_doubleopen() -> None:
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_META_DOUBLE)
     helpMsg.print_help_msg(True)
 
 
-def print_version(pkg_name):
+def print_version(pkg_name: str) -> None:
     print_package_version(pkg_name, "FOSSLight Yocto Version:")
